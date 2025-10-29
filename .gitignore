@@ -125,3 +125,4 @@ logs/
 # Vector stores
 faiss_index/
 vectorstore/
+
