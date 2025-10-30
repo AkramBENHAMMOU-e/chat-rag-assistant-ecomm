@@ -132,14 +132,14 @@ uvicorn app:app --host 0.0.0.0 --port 8081 --reload
 uvicorn app:app --host 0.0.0.0 --port 8081
 ```
 
-Le service sera accessible sur : http://localhost:8081
+Le service sera accessible sur : http://localhost:8001
 
 ## 📖 Utilisation
 
 ### Test de santé
 
 ```bash
-curl http://localhost:8081/health
+curl http://localhost:8001/health
 ```
 
 Réponse attendue :
@@ -152,7 +152,7 @@ Réponse attendue :
 ### Test d'initialisation
 
 ```bash
-curl http://localhost:8081/
+curl http://localhost:8001/
 ```
 
 Réponse attendue :
@@ -167,7 +167,7 @@ Réponse attendue :
 ### Poser une question
 
 ```bash
-curl -X POST http://localhost:8081/rag-query \
+curl -X POST http://localhost:8001/rag-query \
   -H "Content-Type: application/json" \
   -d '{"question": "Quels sont les meilleurs cafés en grains ?"}'
 ```
@@ -182,9 +182,9 @@ Réponse :
 ## 📚 API Documentation
 
 Une fois le service démarré, accédez à :
-- **Swagger UI** : http://localhost:8081/docs
-- **ReDoc** : http://localhost:8081/redoc
-- **OpenAPI JSON** : http://localhost:8081/openapi.json
+- **Swagger UI** : http://localhost:8001/docs
+- **ReDoc** : http://localhost:8001/redoc
+- **OpenAPI JSON** : http://localhost:8001/openapi.json
 
 ## 🧪 Tests
 
@@ -239,28 +239,6 @@ rag-assistant/
 ├── README.md            # Documentation
 └── rag_env/             # Environnement virtuel Python (IGNORÉ)
 ```
-
-### Ajout de nouvelles fonctionnalités
-
-1. Modifiez `app.py` pour ajouter de nouveaux endpoints
-2. Testez localement avec `--reload`
-3. Documentez dans ce README
-
-## 📝 Variables d'Environnement
-
-| Variable | Description | Requis | Défaut |
-|----------|-------------|--------|---------|
-| `BACKEND_URL` | URL du backend Spring Boot | Non | http://localhost:8080 |
-| `GOOGLE_API_KEY` | Clé API Google Gemini | **Oui** | - |
-| `EMBEDDING_MODEL` | Modèle d'embedding HuggingFace | Non | all-MiniLM-L6-v2 |
-| `LLM_MODEL` | Modèle LLM Gemini | Non | gemini-2.5-flash |
-| `POSTGRES_HOST` | Hôte PostgreSQL | Non | localhost |
-| `POSTGRES_PORT` | Port PostgreSQL | Non | 5432 |
-| `POSTGRES_DB` | Nom de la base de données | Non | ecommerceInt |
-| `POSTGRES_USER` | Utilisateur PostgreSQL | Non | admin |
-| `POSTGRES_PASSWORD` | Mot de passe PostgreSQL | Non | admin123 |
-| `COLLECTION_NAME` | Nom de la collection vectorielle | Non | products_reviews |
-| `PORT` | Port FastAPI | Non | 8081 |
 
 ## 🤝 Contribution
 
