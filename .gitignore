@@ -79,6 +79,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+rag_env/
+*.env
 
 # Spyder project settings
 .spyderproject
@@ -125,4 +127,5 @@ logs/
 # Vector stores
 faiss_index/
 vectorstore/
+
 

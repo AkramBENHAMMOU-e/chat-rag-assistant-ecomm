@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from langchain.docstore.document import Document
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_chroma import Chroma
+from langchain_community.vectorstores import PGVector
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import RetrievalQA
 from langchain.chains.query_constructor.base import AttributeInfo
@@ -16,7 +16,18 @@ load_dotenv()
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8080")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-LLM_MODEL = os.getenv("LLM_MODEL", "gemini-1.5-flash") # gemini-1.5-flash est un bon choix
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash") # gemini-1.5-flash est un bon choix
+
+# Configuration PostgreSQL avec pgvector
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "ecommerceInt")
+POSTGRES_USER = os.getenv("POSTGRES_USER", "admin")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "admin123")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME", "products_reviews")
+
+# Construire la connection string pour PostgreSQL
+CONNECTION_STRING = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
 # Vérifier que la clé API est présente
 if not GOOGLE_API_KEY:
@@ -122,14 +133,26 @@ print(f"📄 {len(documents)} documents créés ({product_count} produits + {rev
 print("🔄 Initialisation du modèle d'embedding...")
 embedding_model = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 
-# 4. Conversion des documents en vecteurs avec ChromaDB
-print("🔄 Création de la base vectorielle ChromaDB...")
-vectorstore = Chroma.from_documents(
-    documents=documents, 
-    embedding=embedding_model,
-    persist_directory="./chroma_db"  # Persister la base de données
-)
-print("✅ Base vectorielle ChromaDB créée avec succès")
+# 4. Conversion des documents en vecteurs avec pgvector
+print("🔄 Création de la base vectorielle PostgreSQL avec pgvector...")
+print(f"📊 Connexion à PostgreSQL: {POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
+
+try:
+    vectorstore = PGVector.from_documents(
+        documents=documents,
+        embedding=embedding_model,
+        connection_string=CONNECTION_STRING,
+        collection_name=COLLECTION_NAME,
+        pre_delete_collection=True  # Supprimer la collection existante si elle existe
+    )
+    print("✅ Base vectorielle PostgreSQL (pgvector) créée avec succès")
+except Exception as e:
+    print(f"❌ Erreur lors de la création de la base vectorielle: {e}")
+    print("\n💡 Vérifiez que:")
+    print("   1. PostgreSQL est installé et démarré")
+    print("   2. L'extension pgvector est installée: CREATE EXTENSION vector;")
+    print("   3. Les identifiants PostgreSQL dans .env sont corrects")
+    exit(1)
 
 # 5. Initialisation du LLM
 print("🔄 Initialisation du modèle de langage...")
@@ -196,7 +219,7 @@ retriever = SelfQueryRetriever.from_llm(
     search_kwargs={"k": 10}
 )
 
-print("✅ SelfQueryRetriever configuré avec ChromaDB !")
+print("✅ SelfQueryRetriever configuré avec PostgreSQL (pgvector) !")
 
 # 7. Configuration de la chaîne RAG
 rag_chain = RetrievalQA.from_chain_type(
